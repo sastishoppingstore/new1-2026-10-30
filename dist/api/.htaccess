@@ -1,0 +1,14 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Exact matches for API routes
+    RewriteRule ^properties/?$ properties.php [QSA,L]
+    RewriteRule ^inquiries/?$ inquiries.php [QSA,L]
+    RewriteRule ^saved/?$ saved.php [QSA,L]
+
+    # Map any file without extension to .php if it exists
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME}.php -f
+    RewriteRule ^([^\.]+)$ $1.php [NC,L,QSA]
+</IfModule>

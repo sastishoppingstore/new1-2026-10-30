@@ -1,0 +1,38 @@
+# StackCP / Apache Configuration
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Route API requests to PHP scripts
+    RewriteRule ^api/properties/?$ api/properties.php [QSA,L]
+    RewriteRule ^api/inquiries/?$ api/inquiries.php [QSA,L]
+    RewriteRule ^api/saved/?$ api/saved.php [QSA,L]
+
+    # Serve existing files and directories directly
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Don't rewrite missing assets to index.html - return 404 to avoid MIME type errors
+    RewriteCond %{REQUEST_URI} \.(js|mjs|css|png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot)$ [NC]
+    RewriteRule ^ - [R=404,L]
+
+    # SPA routing fallback for frontend navigation
+    RewriteRule ^ index.html [L]
+</IfModule>
+
+# Force correct MIME types for JavaScript and CSS
+<IfModule mod_mime.c>
+    AddType application/javascript .js .mjs
+    AddType text/css .css
+    AddType image/svg+xml .svg
+    AddType application/json .json
+</IfModule>
+
+DirectoryIndex index.html index.php
+
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+</IfModule>

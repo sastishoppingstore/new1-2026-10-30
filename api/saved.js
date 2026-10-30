@@ -1,0 +1,42 @@
+import supabase from './db-client.js';
+
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(204).end();
+
+  try {
+    if (req.method === 'GET') {
+      const { session_id } = req.query;
+      let query = supabase.from('saved_properties').select('*').order('id', { ascending: false });
+      if (session_id) query = query.eq('session_id', session_id);
+      const { data, error } = await query;
+      if (error) throw error;
+      return res.status(200).json(data);
+    }
+
+    if (req.method === 'POST') {
+      const payload = req.body;
+      const { data, error } = await supabase
+        .from('saved_properties')
+        .insert(payload)
+        .select()
+        .single();
+      if (error) throw error;
+      return res.status(201).json(data);
+    }
+
+    if (req.method === 'DELETE') {
+      const { id } = req.body;
+      const { error } = await supabase.from('saved_properties').delete().eq('id', id);
+      if (error) throw error;
+      return res.status(200).json({ ok: true });
+    }
+
+    res.status(405).json({ error: 'Method not allowed' });
+  } catch (err) {
+    console.error('API error:', err);
+    res.status(500).json({ error: err.message });
+  }
+}
